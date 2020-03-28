@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div id="maindiv">
+    <div id="rtable">
+        {% for rawid in result_dict %}
+            <div id="{{ rawid }}" class="apaper">
+                <span class="Z3988" title="yuri"></span>
+                <div class="paperdesc">
+                    <span class="ts"><a href="{{ result_dict.get(rawid).get('link') }}" }}
+                            target="_blank"> {{ result_dict.get(rawid).get('title') }} </a></span>
+                    <br>
+
+                    <span class="as">{{ result_dict.get(rawid).get('author') }}</span>
+                    <br>
+
+                    <span class="ds">{{ result_dict.get(rawid).get('updated') }}</span>
+
+                    <span class="cs"></span>
+                    <br>
+                    
+                    <span class="ccs">version: {{ result_dict.get(rawid).get('_version') }}</span>
+                </div>
+                <div class="dllinks">
+                    <span class="spid">{{ rawid }}</span>
+                    <a href="{{ result_dict.get(rawid).get('link') }}.pdf" target="_blank">pdf</a>
+                    <br>
+                </div>
+                <div style="clear:both"></div>
+                <span class="tt">{{ result_dict.get(rawid).get('summary') }}</span>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
