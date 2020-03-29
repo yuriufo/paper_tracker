@@ -13,6 +13,5 @@ $ pip install -r requirements.txt
 ## run
 
 ```bash
-$ export FLASK_APP=main.py
-$ flask run --host=0.0.0.0 --port=7777
+$ python main.py
 ```

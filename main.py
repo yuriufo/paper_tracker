@@ -32,10 +32,11 @@ class SForm(Form):
         u'关键词(多个关键词使用空格分隔)：',
         validators=[DataRequired(message='关键词不能为空.'),
                     Length(1, 64)])
-    period = IntegerField(
-        u'搜索最近多少天的论文(0-31)：',
-        validators=[DataRequired(message='取值范围为0-31天.'),
-                    NumberRange(1, 31, message='取值为0-31天.')])
+    period = IntegerField(u'搜索最近多少天的论文(0-31)：',
+                          validators=[
+                              DataRequired(message='取值范围为0-31天.'),
+                              NumberRange(1, 31, message='取值为0-31天.')
+                          ])
     subjectCategory = SelectMultipleField(
         u'主题：',
         validators=[DataRequired(message='至少选择一个主题.')],
@@ -104,7 +105,9 @@ def arxiv():
                 sp = int(form.period.data)  # 时期
                 if ' ' in kw:
                     kw = kw.split(' ')
-                result_dict, _ = arx.search(Subject_Category=sc, keyword=kw, period=sp)
+                result_dict, _ = arx.search(Subject_Category=sc,
+                                            keyword=kw,
+                                            period=sp)
                 return render_template('arxiv.html', result_dict=result_dict)
             except Exception as e:
                 logger.error(e)
@@ -112,3 +115,7 @@ def arxiv():
             return render_template('index.html', form=form)
     elif request.method == 'GET':
         return render_template('index.html', form=SForm())
+
+
+if __name__ == '__main__':
+    app.run(host="0.0.0.0", port=7777, debug=True)
