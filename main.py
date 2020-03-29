@@ -112,7 +112,3 @@ def arxiv():
             return render_template('index.html', form=form)
     elif request.method == 'GET':
         return render_template('index.html', form=SForm())
-
-
-if __name__ == '__main__':
-    app.run(port=7777, host='127.0.0.1', debug=True)
