@@ -16,6 +16,46 @@ nav li a{
     text-decoration: none;
 }
 
+ul li{
+	list-style:none;
+	margin:0px;
+}
+
+#subjectCategory{
+	overflow: hidden;
+	box-sizing: border-box;
+}
+
+input[type="checkbox"] {
+	position: absolute;
+	clip: rect(0, 0, 0, 0);
+}
+
+input[type='checkbox'] + label {
+	display: inline-block;
+	height: 30px;
+	padding: 2px 12px;
+	font-size: 13px;
+	font-weight: 500;
+	line-height: 2.0;
+	/*color: #009aff;*/
+	border: 2px solid #ccc;
+	text-align: center;
+	float: left;
+	margin: 4px;
+	cursor: pointer;
+	border-radius: 10px;
+}
+
+input[type='checkbox']:checked + label {
+	/*border: 1px solid #009aff;*/
+	 background-color: #4dc63c;
+	 color: #fff;
+	 border-radius: 10px;
+	 font-weight: 500;
+}
+
+
 nav li a:hover {
     background-color: #111;
 }

@@ -29,23 +29,24 @@ arx = Arxiv(db_path=str(dbpath), results_per_iteration=5, time_sleep=0.5)
 
 class SForm(Form):
     keyword = StringField(
-        u'关键词(多个关键词使用空格分隔)：',
+        u'关键词(多个关键词之间使用空格( )分隔)：',
         validators=[DataRequired(message='关键词不能为空.'),
                     Length(1, 64)])
+    author = StringField(u'作者(多个作者之间使用逗号(,)分隔)：', validators=[Length(0, 64)])
     period = IntegerField(u'搜索最近多少天的论文(0-31)：',
                           validators=[
                               DataRequired(message='取值范围为0-31天.'),
                               NumberRange(1, 31, message='取值为0-31天.')
                           ])
     subjectCategory = SelectMultipleField(
-        u'主题：',
+        u'主题(默认已选择部分与安全的主题)：',
         validators=[DataRequired(message='至少选择一个主题.')],
         option_widget=widgets.CheckboxInput(),
         widget=widgets.ListWidget(prefix_label=False))
 
     def __init__(self, *args, **kwargs):
         super(SForm, self).__init__(*args, **kwargs)
-        self.subjectCategory.choices = [
+        self.subjectCategory.choices = sorted([
             ('cs.AI', 'Artificial Intelligence'),
             ('cs.CC', 'Computational Complexity'),
             ('cs.CG', 'Computational Geometry'),
@@ -76,11 +77,13 @@ class SForm(Form):
             ('cs.RO', 'Robotics'),
             ('cs.SI', 'Social and Information Networks'),
             ('cs.SE', 'Software Engineering'), ('cs.SD', 'Sound'),
-            ('cs.SC', 'Symbolic Computation'), ('cs.SY',
-                                                'Systems and Control'),
-            ('cs.OH', 'Other')
+            ('cs.SC', 'Symbolic Computation'),
+            ('cs.SY', 'Systems and Control'), ('cs.OH', 'Other')
+        ],
+                                              key=lambda x: len(x[1]))
+        self.subjectCategory.data = [
+            "cs.AI", "cs.CR", "cs.SE", "cs.CY", "cs.SE", "cs.CE"
         ]
-        self.subjectCategory.default = ["cs.CR", "cs.SE"]
 
 
 @app.route('/')
@@ -101,13 +104,17 @@ def arxiv():
             try:
                 # source = request.form.get('source')  # 数据来源
                 kw = form.keyword.data  # 关键词
+                au = form.author.data  # 作者
                 sc = form.subjectCategory.data  # 主题
                 sp = int(form.period.data)  # 时期
                 if ' ' in kw:
                     kw = kw.split(' ')
+                if ',' in au:
+                    au = au.split(',')
                 result_dict, _ = arx.search(Subject_Category=sc,
                                             keyword=kw,
-                                            period=sp)
+                                            period=sp,
+                                            author=au)
                 return render_template('arxiv.html', result_dict=result_dict)
             except Exception as e:
                 logger.error(e)

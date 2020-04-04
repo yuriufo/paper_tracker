@@ -12,7 +12,7 @@
                             target="_blank"> {{ result_dict.get(rawid).get('title') }} </a></span>
                     <br>
 
-                    <span class="as">{{ result_dict.get(rawid).get('author') }}</span>
+                    <span class="as">{{ result_dict.get(rawid).get('authors') }}</span>
                     <br>
 
                     <span class="ds">{{ result_dict.get(rawid).get('updated') }}</span>
@@ -20,7 +20,7 @@
                     <span class="cs"></span>
                     <br>
                     
-                    <span class="ccs">version: {{ result_dict.get(rawid).get('_version') }}</span>
+                    <span class="ccs">{{ result_dict.get(rawid).get('arxiv_comment') }}</span>
                 </div>
                 <div class="dllinks">
                     <span class="spid">{{ rawid }}</span>

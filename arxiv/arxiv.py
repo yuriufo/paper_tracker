@@ -63,36 +63,40 @@ class Arxiv(object):
         assert len(parts) == 2, 'error parsing url ' + url
         return parts[0], int(parts[1])
 
-    def get_search_query(self, Subject_Category, keyword):
+    def get_search_query(self, Subject_Category, keyword, author):
+        search_query = []
+        # 构造作者请求参数
+        if isinstance(author, (tuple, list)):
+            search_query.append(r"%28{0}%29".format("+OR+".join(
+                ["au:" + au.replace(' ', '+') for au in author])))
+        elif isinstance(author, str) and len(author) > 0:
+            search_query.append(r"%28{0}%29".format("au:" +
+                                                    author.replace(' ', '+')))
+
         # 构造类别请求参数
         if len(Subject_Category) > 0:
-            search_query1 = r"%28{0}%29".format("+OR+".join(
-                ["cat:" + sc for sc in Subject_Category]))
-        else:
-            search_query1 = ""
+            search_query.append(r"%28{0}%29".format("+OR+".join(
+                ["cat:" + sc for sc in Subject_Category])))
 
         # 构造关键词请求参数
         if isinstance(keyword, (tuple, list)):
-            search_query2 = r"%28{0}%29".format(
-                "ti:%22" + "+".join([kw for kw in keyword]) +
-                "%22+OR+abs:%22" + "+".join([kw for kw in keyword]) + "%22")
-        elif isinstance(keyword, str):
-            search_query2 = r"%28{0}%29".format("ti:" + keyword + "+OR+abs:" +
-                                                keyword)
-        else:
-            search_query2 = ""
+            search_query.append(
+                r"%28{0}%29".format("ti:%22" + "+".join([kw
+                                                         for kw in keyword]) +
+                                    "%22+OR+abs:%22" +
+                                    "+".join([kw for kw in keyword]) + "%22"))
+        elif isinstance(keyword, str) and len(author) > 0:
+            search_query.append(r"%28{0}%29".format("ti:" + keyword +
+                                                    "+OR+abs:" + keyword))
 
         # 构造搜索请求参数
-        if search_query1 == "" or search_query2 == "":
-            search_query = search_query1 + search_query2
-        else:
-            search_query = "+AND+".join([search_query1, search_query2])
+        search_query = "+AND+".join(search_query)
         logger.info('Searching arXiv for {0}'.format(search_query))
 
         return search_query
 
-    def search(self, Subject_Category, keyword, period=7):
-        search_query = self.get_search_query(Subject_Category, keyword)
+    def search(self, Subject_Category, keyword, author, period=7):
+        search_query = self.get_search_query(Subject_Category, keyword, author)
         timeNow = datetime.now()
         result = OrderedDict()
 
@@ -125,14 +129,22 @@ class Arxiv(object):
 
                 # 提取某篇论文的raw arxiv id和version
                 rawid, version = self.parse_arxiv_url(j['id'])
-                j['_version'] = version
+                j['_version'] = f'version: v{version}'
 
                 # 若结果中没有这篇论文，则添加
                 if rawid not in result:
                     tmp = OrderedDict()
-                    for i in ("title", "author", "published", "updated",
-                              "summary", "link", "_version"):
-                        if isinstance(j[i], str):
+                    for i in ("title", "authors", "published", "updated",
+                              "summary", "link", 'arxiv_comment'):
+                        if i == 'authors':
+                            tmp[i] = ', '.join([aut['name'] for aut in j[i]])
+                        elif i == 'arxiv_comment':
+                            if 'arxiv_comment' in j:
+                                tmp[i] = j[i].replace("\n ",
+                                                      "").replace("\n", "")
+                            else:
+                                tmp[i] = j['_version']
+                        elif isinstance(j[i], str):
                             tmp[i] = j[i].replace("\n ", "").replace("\n", "")
                         else:
                             tmp[i] = j[i]
