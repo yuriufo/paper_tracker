@@ -4,7 +4,28 @@
 
 <div id="maindiv">
     <div id="rtable">
+        {% if form_arg.get('keyword') != '' %}
+            <p><b>关键词：</b>{{ form_arg.get('keyword') }}</p>
+        {% else %}
+            <p><b>关键词：</b>None</p>
+        {% endif %}
+
+        {% if form_arg.get('author') != '' %}
+            <p><b>作者：</b>{{ form_arg.get('author') }}</p>
+        {% else %}
+            <p><b>作者：</b>None</p>
+        {% endif %}
+
+        <p><b>主题：</b>{{ SC_name }}</p>
+
+        {% if num > 0 %}
+            <div class="msga">预览近 <b>{{ form_arg.get('period') }}</b> 天最新发表/更新的 <b>{{ num }}</b> 篇相关论文如下：</div>
+        {% else %}
+            <div class="msga">近 <b>{{ form_arg.get('period') }}</b> 天无相关论文。</div>
+        {% endif %}
+
         {% for rawid in result_dict %}
+            <hr />
             <div id="{{ rawid }}" class="apaper">
                 <span class="Z3988" title="yuri"></span>
                 <div class="paperdesc">

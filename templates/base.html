@@ -12,10 +12,20 @@
 </head>
 
 <body>
-    <h1><center>论文追踪</center></h1>
+    {% for message in get_flashed_messages() %}
+    <div class="alert">{{ message }}</div>
+    {% endfor %}
+    <h1>
+        <center>论文追踪</center>
+    </h1>
     <nav>
         <ul>
             <li><a href="{{ url_for('index') }}">Home</a></li>
+            {% if current_user.is_authenticated %}
+                <li><a href="{{ url_for('logout') }}">Logout</a></li>
+            {% else %}
+                <li><a href="{{ url_for('login') }}">Login</a></li>
+            {% endif %}
         </ul>
     </nav>
     {% block content %}{% endblock %}

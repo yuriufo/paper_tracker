@@ -15,11 +15,11 @@ logging.basicConfig(format='%(asctime)s - %(filename)s[line:%(lineno)d] - '
                     '%(levelname)s: %(message)s',
                     level=logging.INFO,
                     filename="log.log",
-                    filemode="w")
+                    filemode="w+")
 logger = logging.getLogger(__name__)
 
 
-class Arxiv(object):
+class arXiv(object):
     base_url = 'http://export.arxiv.org/api/query?'
 
     def __init__(self,
@@ -38,6 +38,8 @@ class Arxiv(object):
         self.max_index = max_index
         self.start_index = start_index
 
+        if not Path(self.db_path).exists():
+            Path(self.db_path).mkdir(parents=True)
         if self.max_index is None:
             logger.info('max_index defaulting to inf.')
             self.max_index = 7777777
@@ -85,7 +87,7 @@ class Arxiv(object):
                                                          for kw in keyword]) +
                                     "%22+OR+abs:%22" +
                                     "+".join([kw for kw in keyword]) + "%22"))
-        elif isinstance(keyword, str) and len(author) > 0:
+        elif isinstance(keyword, str) and len(keyword) > 0:
             search_query.append(r"%28{0}%29".format("ti:" + keyword +
                                                     "+OR+abs:" + keyword))
 
@@ -95,14 +97,20 @@ class Arxiv(object):
 
         return search_query
 
-    def search(self, Subject_Category, keyword, author, period=7):
+    def search(self,
+               Subject_Category,
+               keyword,
+               author,
+               period=7,
+               max_ind=None):
         search_query = self.get_search_query(Subject_Category, keyword, author)
         timeNow = datetime.now()
         result = OrderedDict()
 
+        max_index = max_ind if max_ind is not None else self.max_index
         # 开始跟踪论文
         num_added_total = 0
-        for i in range(self.start_index, self.max_index,
+        for i in range(self.start_index, max_index,
                        self.results_per_iteration):
             logger.info("Results {0} - {1}".format(
                 i, i + self.results_per_iteration))
@@ -268,5 +276,4 @@ class Arxiv(object):
 if __name__ == "__main__":
     cpath = Path.cwd()
     dbpath = cpath / 'db'
-    ar = Arxiv(db_path=str(dbpath), results_per_iteration=20)
-    res, _ = ar.search(("cs.CR", "cs.SE"), "malware", 30)
+    ar = arXiv(db_path=str(dbpath), results_per_iteration=20)

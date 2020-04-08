@@ -1,27 +1,52 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h2>arXiv</h2>
-<form method="post" action="/arxiv">
+    <h2>arXiv</h2>
+    <form method="post" action="/arxiv">
 
-    {{ render_field(form.keyword) }}
-    {{ render_field(form.author) }}
-    {{ render_field(form.period) }}
-    {{ render_field(form.subjectCategory) }}
-
-    <center><button type="submit" class="btn">查询</button></center>
-<form/>
+        {{ render_field(form.keyword, 0) }}
+        {{ render_field(form.author, 0) }}
+        {{ render_field(form.period, 0) }}
+        {{ render_field(form.subjectCategory, 1) }}
+        {{ render_field(form.func, 0) }}
+        
+        <center>
+            <button type="submit" class="btn">提交</button>
+        </center>
+    <form />
+    <script>
+        var CheckAll = document.getElementById('selectAll');
+        var UnCheck = document.getElementById('uncheck');
+        var sc = document.getElementById('subjectCategory');
+        var CheckBox = sc.getElementsByTagName('input');
+        CheckAll.onclick = function () {
+            for (i = 0; i < CheckBox.length; i++) {
+                CheckBox[i].checked = true;
+            };
+        };
+        UnCheck.onclick = function () {
+            for (i = 0; i < CheckBox.length; i++) {
+                CheckBox[i].checked = false;
+            };
+        };
+    </script>
 {% endblock %}
 
-{% macro render_field(field) %}
-  <dt>{{ field.label }}
-  <dd>{{ field(**kwargs)|safe }}
-  {% if field.errors %}
-    <ul class=errors>
-    {% for error in field.errors %}
-      <li>{{ error }}</li>
-    {% endfor %}
-    </ul>
-  {% endif %}
-  </dd>
+{% macro render_field(field, selectAll) %}
+    <dt>{{ field.label }}
+    {% if selectAll == 1%}
+        <input type="button" value="全选" class="button" id="selectAll">
+        <input type="button" value="全不选" class="button" id="uncheck">
+    {% endif %}
+
+    <dd>{{ field(**kwargs)|safe }}
+
+    {% if field.errors %}
+        <ul class=errors>
+            {% for error in field.errors %}
+            <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    </dd>
 {% endmacro %}
