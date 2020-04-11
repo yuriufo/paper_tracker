@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<center>
+    <h2>User</h2>
+    <p>{{ users|length }} users</p>
+</center>
+<ul class="view-list">
+    {% for user in users %}
+    <li>{{ user.email }}</li>
+    {% endfor %}
+</ul>
+
+<center>
+    <h2>arXivEmail</h2>
+    <p>{{ arxivemails|length }} items</p>
+</center>
+<ul class="view-list">
+    {% for arxivemail in arxivemails %}
+    <li>{{ arxivemail.email }} - {{ arxivemail.lastTracktime }} - {{ arxivemail.arg_dict }}</li>
+    {% endfor %}
+</ul>
+{% endblock %}

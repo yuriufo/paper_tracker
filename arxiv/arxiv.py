@@ -5,18 +5,19 @@ import time
 import json
 import urllib.request
 import feedparser
-import logging
 
 from datetime import datetime
 from collections import OrderedDict
 from pathlib import Path
 
-logging.basicConfig(format='%(asctime)s - %(filename)s[line:%(lineno)d] - '
-                    '%(levelname)s: %(message)s',
-                    level=logging.INFO,
-                    filename="log.log",
-                    filemode="w+")
-logger = logging.getLogger(__name__)
+from watchlist import logger
+
+# logging.basicConfig(format='%(asctime)s - %(filename)s[line:%(lineno)d] - '
+#                     '%(levelname)s: %(message)s',
+#                     level=logging.INFO,
+#                     filename="log.log",
+#                     filemode="w")
+# logger = logging.getLogger(__name__)
 
 
 class arXiv(object):
@@ -38,6 +39,8 @@ class arXiv(object):
         self.max_index = max_index
         self.start_index = start_index
 
+        if self.db_path is None:
+            self.db_path = Path.cwd() / 'db'
         if not Path(self.db_path).exists():
             Path(self.db_path).mkdir(parents=True)
         if self.max_index is None:
