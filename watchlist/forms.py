@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import re
+
 from wtforms import Form
 from wtforms import IntegerField, StringField, SelectMultipleField, RadioField, PasswordField, widgets
-from wtforms.validators import InputRequired, NumberRange, Length, Email, Optional
+from wtforms.validators import InputRequired, NumberRange, Length, Email, Optional, EqualTo
 
 
 class UserForm(Form):
@@ -18,7 +20,9 @@ class UserForm(Form):
                                        InputRequired(message=u'密码不能为空!'),
                                        Length(min=8,
                                               max=20,
-                                              message=u'密码长度为4-20')
+                                              message=u'密码长度为4-20'),
+                                       EqualTo('password',
+                                               message='Passwords must match.')
                                    ])
     email = StringField(u'Email地址(长度<50)：',
                         validators=[
@@ -89,28 +93,26 @@ class SForm(Form):
     def __init__(self, *args, **kwargs):
         super(SForm, self).__init__(*args, **kwargs)
 
+    @classmethod
+    def get_sc_name(cls, sc):
+        return [sc_[1] for k in sc for sc_ in cls.sc_list if k == sc_[0]]
+
     def get_arg(self):
-        kw = self.keyword.data  # 关键词
-        au = self.author.data  # 作者
+        kw = self.keyword.data.strip()  # 关键词
+        au = self.author.data.strip()  # 作者
         sc = self.subjectCategory.data  # 主题
         fc = int(self.func.data)
         sp = int(self.period.data)  # 时期
         if ' ' in kw:
-            kw = kw.split(' ')
+            kw = re.split(r" +", kw)
         if ',' in au:
-            au = au.split(',')
+            au = re.split(r",+", au)
         arg_dict = {
-            'keyword':
-            kw,
-            'author':
-            au,
-            'Subject_Category':
-            sc,
-            'Subject_Category_name':
-            [sc_[1] for k in sc for sc_ in self.sc_list if k == sc_[0]],
-            'period':
-            sp,
-            'function':
-            fc
+            'keyword': kw,
+            'author': au,
+            'Subject_Category': sc,
+            'Subject_Category_name': self.get_sc_name(sc),
+            'period': sp,
+            'function': fc
         }
         return arg_dict

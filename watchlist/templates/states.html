@@ -1,6 +1,4 @@
-{% extends 'base.html' %}
-
-{% block content %}
+{% extends 'base.html' %} {% block content %} {% if users is not number %}
 <center>
     <h2>User</h2>
     <p>{{ users|length }} users</p>
@@ -10,14 +8,42 @@
     <li>{{ user.email }}</li>
     {% endfor %}
 </ul>
+{% endif %}
 
 <center>
     <h2>arXivEmail</h2>
     <p>{{ arxivemails|length }} items</p>
 </center>
-<ul class="view-list">
+<table>
+    <tr>
+        <td>Email</td>
+        <td>LastTracktime</td>
+        <td>Arg_dict</td>
+        <td>Delete</td>
+    </tr>
     {% for arxivemail in arxivemails %}
-    <li>{{ arxivemail.email }} - {{ arxivemail.lastTracktime }} - {{ arxivemail.arg_dict }}</li>
+    <tr>
+        <td>{{ arxivemail.email }}</td>
+        <td>{{ arxivemail.lastTracktime }}</td>
+        <td>
+            {% if arxivemail.keyword != '' %}
+            <p><b>关键词：</b>{{ arxivemail.keyword }}</p>
+            {% else %}
+            <p><b>关键词：</b>None</p>
+            {% endif %} {% if arxivemail.author != '' %}
+            <p><b>作者：</b>{{ arxivemail.author }}</p>
+            {% else %}
+            <p><b>作者：</b>None</p>
+            {% endif %}
+            <p><b>主题：</b>{{ arxivemail.subjectcategory }}</p>
+            <p><b>监控间隔：</b>{{ arxivemail.period }}</p>
+        </td>
+        <td>
+            <form class="inline-form" method="post" action="{{ url_for('delete', arxiv_id=arxivemail.id) }}">
+                <input type="submit" name="delete" value="Delete" onclick="return confirm('Are you sure?');">
+            </form>
+        </td>
+    </tr>
     {% endfor %}
-</ul>
+</table>
 {% endblock %}

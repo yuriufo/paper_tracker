@@ -8,9 +8,12 @@ import logging
 from flask import Flask
 
 from flask_mail import Mail
+
 from flask_login import LoginManager
 
 from flask_sqlalchemy import SQLAlchemy
+
+from flask_apscheduler import APScheduler
 
 logging.basicConfig(format='%(asctime)s - %(filename)s[line:%(lineno)d] - '
                     '%(levelname)s: %(message)s',
@@ -42,12 +45,20 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # 关闭对模型修改的
 
 mail = Mail(app)
 db = SQLAlchemy(app)
+scheduler = APScheduler()
+scheduler.init_app(app)
 login_manager = LoginManager(app)
+login_manager.session_protection = 'strong'
 login_manager.login_view = 'login'
 
-from arxiv.arxiv import arXiv
+from watchlist.schedulers import task_daily
 
-arx = arXiv(results_per_iteration=5, time_sleep=0.5)
+scheduler.add_job(func=task_daily,
+                  id='interval_task',
+                  trigger='interval',
+                  days=1,
+                  replace_existing=True)
+scheduler.start()
 
 
 @login_manager.user_loader

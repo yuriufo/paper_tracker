@@ -146,7 +146,8 @@ class arXiv(object):
                 if rawid not in result:
                     tmp = OrderedDict()
                     for i in ("title", "authors", "published", "updated",
-                              "summary", "link", 'arxiv_comment'):
+                              "updated_parsed", "summary", "link",
+                              'arxiv_comment'):
                         if i == 'authors':
                             tmp[i] = ', '.join([aut['name'] for aut in j[i]])
                         elif i == 'arxiv_comment':
@@ -154,15 +155,19 @@ class arXiv(object):
                                 tmp[i] = j[i].replace("\n ",
                                                       "").replace("\n", "")
                             else:
-                                tmp[i] = j['_version']
+                                tmp[i] = ""
+                        elif i == 'link':
+                            tmp[i] = j[i]
+                            tmp['pdf'] = j[i].replace("abs", "pdf")
                         elif isinstance(j[i], str):
                             tmp[i] = j[i].replace("\n ", "").replace("\n", "")
                         else:
                             tmp[i] = j[i]
+
                     # 检查时间，默认一星期内
                     tempTime = datetime.strptime(tmp['updated'],
                                                  r'%Y-%m-%dT%H:%M:%SZ')
-                    if (timeNow - tempTime).days > period:
+                    if (timeNow - tempTime).days >= period:
                         return result, num_added_total
 
                     result[rawid] = tmp

@@ -6,104 +6,126 @@
             font-family: arial;
             height: 100%;
         }
+        
         .apaper {
             margin-top: 25px;
             min-height: 300px;
         }
+        
         .msga {
             background-color: #EEF;
             padding: 10px;
             border-radius: 10px;
             margin-top: 2px;
         }
+        
         .paperdesc {
             float: left;
             width: 750px;
         }
+        
         .dllinks {
             float: right;
             text-align: right;
         }
+        
         .animg {
             text-align: left;
             height: 156px;
         }
+        
         .as {
             font-size: 14px;
             color: #900;
         }
-
+        
         .cs {
             color: #009;
             font-size: 14px;
         }
-
+        
         .ts {
             font-weight: bold;
             font-size: 16px;
         }
+        
         .as a:link {
             text-decoration: none;
             color: #900;
         }
+        
         .as a:visited {
             text-decoration: none;
             color: #900;
         }
+        
         .as a:hover {
             text-decoration: underline;
             color: #F00;
         }
+        
         .as a:active {
             text-decoration: none;
             color: #900;
         }
+        
         .ts a:link {
             text-decoration: none;
             color: #333;
         }
+        
         .ts a:visited {
             text-decoration: none;
             color: #333;
         }
+        
         .ts a:hover {
             text-decoration: underline;
             color: #000;
         }
+        
         .ts a:active {
             text-decoration: none;
             color: #333;
         }
+        
         .cs a:link {
             text-decoration: none;
             color: #009;
         }
+        
         .cs a:visited {
             text-decoration: none;
             color: #009;
         }
+        
         .cs a:hover {
             text-decoration: underline;
             color: #00F;
         }
+        
         .cs a:active {
             text-decoration: none;
             color: #009;
         }
+        
         .ds {
             margin-right: 10px;
             color: #090;
             font-size: 14px;
         }
+        
         .ds2 {
             margin-right: 10px;
             color: #099;
             font-size: 14px;
         }
+        
         .ccs {
             color: #000;
             font-size: 12px;
         }
+        
         .tt {
             color: #000;
             background-color: #EFE;
@@ -113,20 +135,20 @@
             border-radius: 5px;
             text-align: justify;
         }
+        
         .spid {
             font-size: 14px;
             margin-right: 5px;
             color: #555;
         }
+        
         #maindiv {
             width: 970px;
             padding: 15px;
             margin-left: auto;
             margin-right: auto;
-
             border-left: solid 1px #D6D3C5;
             border-right: solid 1px #D6D3C5;
-
             background-color: white;
         }
     </style>
@@ -141,9 +163,7 @@
                 <p><b>关键词：</b>{{ form_arg.get('keyword') }}</p>
                 {% else %}
                 <p><b>关键词：</b>None</p>
-                {% endif %}
-
-                {% if form_arg.get('author') != '' %}
+                {% endif %} {% if form_arg.get('author') != '' %}
                 <p><b>作者：</b>{{ form_arg.get('author') }}</p>
                 {% else %}
                 <p><b>作者：</b>None</p>
@@ -155,9 +175,7 @@
                 <div class="msga">近 <b>{{ form_arg.get('period') }}</b> 天发表/更新的 <b>{{ num }}</b> 篇相关论文如下：</div>
                 {% else %}
                 <div class="msga">近 <b>{{ form_arg.get('period') }}</b> 天无相关论文。</div>
-                {% endif %}
-
-                {% for rawid in result_dict %}
+                {% endif %} {% for rawid in result_dict %}
                 <hr />
                 <div id="{{ rawid }}" class="apaper">
                     <span class="Z3988" title="yuri"></span>
@@ -172,13 +190,12 @@
                         <span class="ds">{{ result_dict.get(rawid).get('updated') }}</span>
 
                         <span class="cs"></span>
-                        <br>
-
-                        <span class="ccs">{{ result_dict.get(rawid).get('arxiv_comment') }}</span>
+                        <br> {% if result_dict.get(rawid).get('arxiv_comment') != "" %}
+                        <span class="ccs">{{ result_dict.get(rawid).get('arxiv_comment') }}</span> {% endif %}
                     </div>
                     <div class="dllinks">
                         <span class="spid">{{ rawid }}</span>
-                        <a href="{{ result_dict.get(rawid).get('link') }}.pdf" target="_blank">pdf</a>
+                        <a href="{{ result_dict.get(rawid).get('pdf') }}" target="_blank">pdf</a>
                         <br>
                     </div>
                     <div style="clear:both"></div>

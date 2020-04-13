@@ -17,8 +17,17 @@ def initdb(drop):
         db.drop_all()
     db.create_all()
 
-    user = User(email=os.environ.get('EMAIL'))
+    user = User(email=os.environ.get('EMAIL1'))
     user.set_password(os.environ.get('PASSWORD'))
     db.session.add(user)
+
+    user = User(email=os.environ.get('EMAIL2'))
+    user.set_password(os.environ.get('PASSWORD'))
+    db.session.add(user)
+
+    user = User(email=os.environ.get('EMAIL3'))
+    user.set_password(os.environ.get('PASSWORD'))
+    db.session.add(user)
+
     db.session.commit()
     click.echo('Initialized database.')  # 输出提示信息

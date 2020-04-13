@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import Thread
 import datetime
+
+from threading import Thread
 
 from watchlist import app, mail
 
@@ -25,20 +26,21 @@ def send_message(to, subject, sender, template, **kwargs):
 
 def send_confirm_email(user, token, to=None):
     send_message(subject='Email Confirm',
-                 sender='yuri<{0}>'.format(app.config['MAIL_USERNAME']),
+                 sender=("yuri", app.config['MAIL_USERNAME']),
                  to=to or user.email,
                  template='confirm',
                  user=user,
                  token=token)
 
 
-# def send_papers(form_arg, to=None):
-#     # send_papers(form_arg, to=current_user.email)
-#     send_message(subject='paper tracker {0}'.format(datetime.date.today()),
-#                  sender='yuri<{0}>'.format(app.config['MAIL_USERNAME']),
-#                  to=to,
-#                  template='email',
-#                  form_arg=form_arg)
+def send_papers(to=None, **kwargs):
+    # send_papers(form_arg, to=current_user.email)
+    send_message(subject='paper tracker {0}'.format(datetime.date.today()),
+                 sender=("yuri", app.config['MAIL_USERNAME']),
+                 to=to,
+                 template='email',
+                 **kwargs)
+
 
 # msg = Message(
 #     'paper tracker {0}'.format(datetime.date.today()),

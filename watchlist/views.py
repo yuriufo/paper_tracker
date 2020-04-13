@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-import json
 
 from flask import request, render_template
 from flask import url_for, redirect, flash
@@ -14,6 +13,10 @@ from watchlist import app, db, logger
 from watchlist.models import User, arXivEmail
 from watchlist.forms import UserForm, SForm
 
+from arxiv.arxiv import arXiv
+
+arx = arXiv(results_per_iteration=5, time_sleep=0.5)
+
 
 @app.route('/')
 @app.route('/index')
@@ -23,7 +26,6 @@ def index():
 
 @app.route('/arxiv', methods=['GET', 'POST'])
 def arxiv():
-    global arx
     if request.method == 'POST':  # 判断是否是 POST 请求
         try:
             form = SForm(formdata=request.form)
@@ -43,12 +45,15 @@ def arxiv():
                     flash('Login firstly.')
                     return redirect(url_for('login'))
                 else:
-                    arxivemail = arXivEmail(
-                        email=current_user.email,
-                        arg_dict=json.dumps(form_arg))  # json.loads()
+                    arxivemail = arXivEmail(email=current_user.email,
+                                            keyword=str(form_arg['keyword']),
+                                            author=str(form_arg['author']),
+                                            subjectcategory=str(
+                                                form_arg['Subject_Category']),
+                                            period=form_arg['period'])
                     db.session.add(arxivemail)
                     db.session.commit()
-                    flash('监控添加成功')
+                    flash(u'监控添加成功')
                     return redirect(url_for('index'))
             else:
                 flash('Form verification failed.')
@@ -56,7 +61,7 @@ def arxiv():
         except Exception:
             logger.exception('Faild.')
             flash('Get a Exception.')
-
+            return render_template('index.html', form=form)
     return redirect(url_for('index'))
 
 
@@ -141,6 +146,17 @@ def logout():
     return redirect(url_for('index'))
 
 
+@app.route('/delete/<int:arxiv_id>', methods=['POST'])
+@login_required
+def delete(arxiv_id):
+    arxivemail = arXivEmail.query.filter_by(email=current_user.email,
+                                            id=arxiv_id).first()
+    db.session.delete(arxivemail)
+    db.session.commit()
+    flash('Item deleted.')
+    return redirect(url_for('states'))
+
+
 @app.route('/states')
 @login_required
 def states():
@@ -148,7 +164,7 @@ def states():
         users = User.query.all()
         arxivemails = arXivEmail.query.all()
     else:
-        users = User.query.get(current_user.email)
-        arxivemails = arXivEmail.query.filter_by(email=current_user.email)
-
+        users = 0
+        arxivemails = arXivEmail.query.filter_by(
+            email=current_user.email).all()
     return render_template('states.html', users=users, arxivemails=arxivemails)

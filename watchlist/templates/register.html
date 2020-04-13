@@ -1,28 +1,27 @@
-{% extends 'base.html' %}
-
-{% block content %}
+{% extends 'base.html' %} {% block content %}
+<center>
     <h2>Register</h2>
-    <form method="post">
+</center>
+<form method="post" style="width: 50%;margin:0px auto;">
 
-        {{ render_field(form.email) }}
-        {{ render_field(form.password) }}
-        {{ render_field(form.password_valid) }}
+    {{ render_field(form.email, 1) }} {{ render_field(form.password, 0) }} {{ render_field(form.password_valid, 0) }}
 
-        <center><button type="submit" class="btn">Submit</button></center>
-    <form />
-    </script>
-{% endblock %}
+    <center><button type="submit" class="btn">Submit</button></center>
+</form>
 
-{% macro render_field(field) %}
-    <dt>{{ field.label }}
-    <dd>{{ field(**kwargs)|safe }}
+{% endblock %} {% macro render_field(field, id) %}
+<dt>{{ field.label }}
+<dd>{{ field(**kwargs)|safe }}
+
+    <!-- {% if id == 1 %}
+        <span class="input-group-addon" id="captcha-btn" style="cursor: pointer;" >获取验证码</span>
+    {% endif %} -->
 
     {% if field.errors %}
-        <ul class=errors>
-            {% for error in field.errors %}
-            <li>{{ error }}</li>
-            {% endfor %}
-        </ul>
+    <ul class=errors>
+        {% for error in field.errors %}
+        <li>{{ error }}</li>
+        {% endfor %}
+    </ul>
     {% endif %}
-    </dd>
-{% endmacro %}
+ {% endmacro %}
