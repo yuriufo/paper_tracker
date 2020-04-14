@@ -149,22 +149,44 @@ def logout():
 @app.route('/delete/<int:arxiv_id>', methods=['POST'])
 @login_required
 def delete(arxiv_id):
-    arxivemail = arXivEmail.query.filter_by(email=current_user.email,
-                                            id=arxiv_id).first()
+    if current_user.email == os.environ.get('EMAIL'):
+        arxivemail = db.session.query(arXivEmail).filter_by(
+            id=arxiv_id).first()
+    else:
+        arxivemail = db.session.query(arXivEmail).filter_by(
+            email=current_user.email, id=arxiv_id).first()
+        if arxivemail is None:
+            flash('Deleted failed.')
+            return redirect(url_for('states'))
     db.session.delete(arxivemail)
     db.session.commit()
     flash('Item deleted.')
     return redirect(url_for('states'))
 
 
+@app.route('/logoff', methods=['POST'])
+@login_required
+def logoff():
+    arxivemails = db.session.query(arXivEmail).filter_by(
+        email=current_user.email).all()
+    for arxivemail in arxivemails:
+        db.session.delete(arxivemail)
+    user = db.session.query(User).get(current_user.email)
+    logout_user()
+    db.session.delete(user)
+    db.session.commit()
+    flash('logoff success.')
+    return redirect(url_for('index'))
+
+
 @app.route('/states')
 @login_required
 def states():
     if current_user.email == os.environ.get('EMAIL'):
-        users = User.query.all()
-        arxivemails = arXivEmail.query.all()
+        users = db.session.query(User).all()
+        arxivemails = db.session.query(arXivEmail).all()
     else:
         users = 0
-        arxivemails = arXivEmail.query.filter_by(
+        arxivemails = db.session.query(arXivEmail).filter_by(
             email=current_user.email).all()
     return render_template('states.html', users=users, arxivemails=arxivemails)

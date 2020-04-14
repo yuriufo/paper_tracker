@@ -2,11 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import time
-import json
 import urllib.request
 import feedparser
 
-from datetime import datetime
+import datetime
 from collections import OrderedDict
 from pathlib import Path
 
@@ -24,14 +23,12 @@ class arXiv(object):
     base_url = 'http://export.arxiv.org/api/query?'
 
     def __init__(self,
-                 db_path=None,
                  max_index=None,
                  start_index=0,
                  sort_by='lastUpdatedDate',
                  sort_order='descending',
                  results_per_iteration=10,
                  time_sleep=2):
-        self.db_path = db_path
         self.sort_by = sort_by
         self.sort_order = sort_order
         self.results_per_iteration = results_per_iteration
@@ -39,10 +36,6 @@ class arXiv(object):
         self.max_index = max_index
         self.start_index = start_index
 
-        if self.db_path is None:
-            self.db_path = Path.cwd() / 'db'
-        if not Path(self.db_path).exists():
-            Path(self.db_path).mkdir(parents=True)
         if self.max_index is None:
             logger.info('max_index defaulting to inf.')
             self.max_index = 7777777
@@ -107,7 +100,9 @@ class arXiv(object):
                period=7,
                max_ind=None):
         search_query = self.get_search_query(Subject_Category, keyword, author)
-        timeNow = datetime.now()
+        timeNow = datetime.datetime.strptime(str(datetime.date.today()),
+                                             '%Y-%m-%d')
+
         result = OrderedDict()
 
         max_index = max_ind if max_ind is not None else self.max_index
@@ -165,9 +160,9 @@ class arXiv(object):
                             tmp[i] = j[i]
 
                     # 检查时间，默认一星期内
-                    tempTime = datetime.strptime(tmp['updated'],
-                                                 r'%Y-%m-%dT%H:%M:%SZ')
-                    if (timeNow - tempTime).days >= period:
+                    tempTime = datetime.datetime.strptime(
+                        tmp['updated'].split('T')[0], r'%Y-%m-%d')
+                    if (timeNow - tempTime).days > period:
                         return result, num_added_total
 
                     result[rawid] = tmp
@@ -187,101 +182,101 @@ class arXiv(object):
 
         return result, num_added_total
 
-    def dump_db(self, Subject_Category, keyword):
-        db_name = f'{Subject_Category}-{keyword}'
+    # def dump_db(self, Subject_Category, keyword):
+    #     db_name = f'{Subject_Category}-{keyword}'
 
-        search_query = self.get_search_query(Subject_Category, keyword)
+    #     search_query = self.get_search_query(Subject_Category, keyword)
 
-        # 若存在数据库则加载
-        try:
-            with open(self.db_path + '\\' + db_name + '.json', 'r') as f:
-                db = json.load(f, object_hook=OrderedDict)
-        except Exception as e:
-            logger.error('error loading existing database:')
-            logger.error(e)
-            logger.error('starting from an empty database')
-            db = OrderedDict()
+    #     # 若存在数据库则加载
+    #     try:
+    #         with open(self.db_path + '\\' + db_name + '.json', 'r') as f:
+    #             db = json.load(f, object_hook=OrderedDict)
+    #     except Exception as e:
+    #         logger.error('error loading existing database:')
+    #         logger.error(e)
+    #         logger.error('starting from an empty database')
+    #         db = OrderedDict()
 
-        # 开始跟踪论文
-        logger.info('database has {0} entries at start'.format(len(db)))
-        num_added_total = 0
-        for i in range(self.start_index, self.max_index,
-                       self.results_per_iteration):
-            logger.info("Results {0} - {1}".format(
-                i, i + self.results_per_iteration))
+    #     # 开始跟踪论文
+    #     logger.info('database has {0} entries at start'.format(len(db)))
+    #     num_added_total = 0
+    #     for i in range(self.start_index, self.max_index,
+    #                    self.results_per_iteration):
+    #         logger.info("Results {0} - {1}".format(
+    #             i, i + self.results_per_iteration))
 
-            query = 'search_query={0}&sortBy={1}&sortOrder={2}&start={3}&max_results={4}'.format(
-                search_query, self.sort_by, self.sort_order, i,
-                self.results_per_iteration)
+    #         query = 'search_query={0}&sortBy={1}&sortOrder={2}&start={3}&max_results={4}'.format(
+    #             search_query, self.sort_by, self.sort_order, i,
+    #             self.results_per_iteration)
 
-            for _ in range(5):
-                try:
-                    with urllib.request.urlopen(url=self.base_url + query,
-                                                timeout=5.0) as url:
-                        response = url.read()
-                    parse = feedparser.parse(response)
-                    break
-                except Exception as e:
-                    logger.error(e)
-            else:
-                logger.error('Get response error.')
-                break
+    #         for _ in range(5):
+    #             try:
+    #                 with urllib.request.urlopen(url=self.base_url + query,
+    #                                             timeout=5.0) as url:
+    #                     response = url.read()
+    #                 parse = feedparser.parse(response)
+    #                 break
+    #             except Exception as e:
+    #                 logger.error(e)
+    #         else:
+    #             logger.error('Get response error.')
+    #             break
 
-            num_added = 0
-            num_skipped = 0
-            for e in parse.entries:
-                j = self.encode_feedparser_dict(e)
+    #         num_added = 0
+    #         num_skipped = 0
+    #         for e in parse.entries:
+    #             j = self.encode_feedparser_dict(e)
 
-                # 提取某篇论文的raw arxiv id和version
-                rawid, version = self.parse_arxiv_url(j['id'])
-                j['_version'] = version
+    #             # 提取某篇论文的raw arxiv id和version
+    #             rawid, version = self.parse_arxiv_url(j['id'])
+    #             j['_version'] = version
 
-                # 若数据库中没有这篇论文或版本更新，则添加或更新数据库
-                if rawid not in db or j['_version'] > db[rawid]['_version']:
-                    tmp = OrderedDict()
-                    for i in ("title", "author", "published", "updated",
-                              "summary", "link", "_version"):
-                        if isinstance(j[i], str):
-                            tmp[i] = j[i].replace("\n ", "").replace("\n", "")
-                        else:
-                            tmp[i] = j[i]
-                    db[rawid] = tmp
-                    logger.info('Updated %s added %s' %
-                                (j['updated'].encode('utf-8'),
-                                 j['title'].encode('utf-8')))
-                    num_added += 1
-                    num_added_total += 1
-                else:
-                    num_skipped += 1
+    #             # 若数据库中没有这篇论文或版本更新，则添加或更新数据库
+    #             if rawid not in db or j['_version'] > db[rawid]['_version']:
+    #                 tmp = OrderedDict()
+    #                 for i in ("title", "author", "published", "updated",
+    #                           "summary", "link", "_version"):
+    #                     if isinstance(j[i], str):
+    #                         tmp[i] = j[i].replace("\n ", "").replace("\n", "")
+    #                     else:
+    #                         tmp[i] = j[i]
+    #                 db[rawid] = tmp
+    #                 logger.info('Updated %s added %s' %
+    #                             (j['updated'].encode('utf-8'),
+    #                              j['title'].encode('utf-8')))
+    #                 num_added += 1
+    #                 num_added_total += 1
+    #             else:
+    #                 num_skipped += 1
 
-            logger.info('Added {0} papers, already had {1}.'.format(
-                num_added, num_skipped))
+    #         logger.info('Added {0} papers, already had {1}.'.format(
+    #             num_added, num_skipped))
 
-            if len(parse.entries) == 0:
-                logger.info(
-                    'Received no results from arxiv. Exiting. Restart later maybe.'
-                )
-                break
+    #         if len(parse.entries) == 0:
+    #             logger.info(
+    #                 'Received no results from arxiv. Exiting. Restart later maybe.'
+    #             )
+    #             break
 
-            # logger.info('Sleeping for {0} seconds'.format(self.time_sleep))
-            time.sleep(self.time_sleep)
+    #         # logger.info('Sleeping for {0} seconds'.format(self.time_sleep))
+    #         time.sleep(self.time_sleep)
 
-        # 若有新论文，则更新数据库
-        if num_added_total > 0:
-            logger.info('Saving database with {0} papers to {1}'.format(
-                len(db), self.db_path + '\\' + db_name + '.json'))
-            items = sorted(db.items(),
-                           key=lambda obj: obj[1]["updated"],
-                           reverse=True)
-            new_db = OrderedDict()
-            for item in items:
-                new_db[item[0]] = db[item[0]]
+    #     # 若有新论文，则更新数据库
+    #     if num_added_total > 0:
+    #         logger.info('Saving database with {0} papers to {1}'.format(
+    #             len(db), self.db_path + '\\' + db_name + '.json'))
+    #         items = sorted(db.items(),
+    #                        key=lambda obj: obj[1]["updated"],
+    #                        reverse=True)
+    #         new_db = OrderedDict()
+    #         for item in items:
+    #             new_db[item[0]] = db[item[0]]
 
-            with open(self.db_path + '\\' + db_name + '.json', 'w') as f:
-                json.dump(new_db, f, indent=4)
+    #         with open(self.db_path + '\\' + db_name + '.json', 'w') as f:
+    #             json.dump(new_db, f, indent=4)
 
 
 if __name__ == "__main__":
     cpath = Path.cwd()
     dbpath = cpath / 'db'
-    ar = arXiv(db_path=str(dbpath), results_per_iteration=20)
+    ar = arXiv(results_per_iteration=20)

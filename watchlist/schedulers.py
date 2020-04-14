@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from datetime import datetime
+import datetime
 
 from watchlist import db, logger
 
@@ -18,9 +18,10 @@ arx = arXiv(results_per_iteration=10, time_sleep=0.5)
 
 def task_daily():
     arxivemails = arXivEmail.query.all()
-    logger.info('arXivEmail: {0} items.'.format(arxivemails.count()))
+    logger.info('arXivEmail: {0} items.'.format(len(arxivemails)))
 
-    timeNow = datetime.now()
+    timeNow = datetime.datetime.now()
+    timeNow_date = datetime.datetime.strptime(str(timeNow.date()), '%Y-%m-%d')
     for arxivemail in arxivemails:
         email = arxivemail.email
         keyword = arxivemail.keyword
@@ -28,17 +29,19 @@ def task_daily():
         subjectcategory = arxivemail.subjectcategory
         period = arxivemail.period
         lastTracktime = arxivemail.lastTracktime
-        if (timeNow - lastTracktime).days < period:
+        lastTracktime_date = datetime.datetime.strptime(
+            str(lastTracktime.date()), '%Y-%m-%d')
+        if (timeNow_date - lastTracktime_date).days < period:
             continue
 
         try:
             keyword = eval(keyword)
         except Exception:
-            logger.exception('eval(keyword) faild: {0}'.format(keyword))
+            pass
         try:
             author = eval(author)
         except Exception:
-            logger.exception('eval(author) faild: {0}'.format(author))
+            pass
         try:
             subjectcategory = eval(subjectcategory)
         except Exception:
@@ -63,12 +66,13 @@ def task_daily():
                             form_arg=form_arg,
                             SC_name=SForm.get_sc_name(subjectcategory),
                             time=str(datetime.date.today()))
+                logger.info(
+                    f"send: {email} - {keyword} - {author} - {period} - {lastTracktime}"
+                )
         except Exception:
             logger.exception('search or send email faild.')
             continue
 
         arXivEmail.query.filter(arXivEmail.id == arxivemail.id).update(
-            {"lastTracktime": datetime.datetime.now()})
+            {"lastTracktime": timeNow})
         db.session.commit()
-
-        logger.info(f"send: {email} - {keyword} - {author} - {period} - {lastTracktime}")

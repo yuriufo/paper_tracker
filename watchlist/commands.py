@@ -3,9 +3,10 @@
 
 import os
 import click
+import datetime
 
 from watchlist import app, db
-from watchlist.models import User
+from watchlist.models import User, arXivEmail
 
 
 @app.cli.command()  # 注册为命令
@@ -31,3 +32,16 @@ def initdb(drop):
 
     db.session.commit()
     click.echo('Initialized database.')  # 输出提示信息
+
+
+@app.cli.command()  # 减一天
+# 设置选项
+def deleteoneday():
+    arxivemails = arXivEmail.query.all()
+    for arxivemail in arxivemails:
+        arXivEmail.query.filter(arXivEmail.id == arxivemail.id).update({
+            "lastTracktime":
+            arxivemail.lastTracktime - datetime.timedelta(days=1)
+        })
+        db.session.commit()
+    click.echo('Update database.')  # 输出提示信息

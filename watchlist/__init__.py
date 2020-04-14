@@ -40,7 +40,8 @@ app.config['MAIL_PASSWORD'] = os.environ.get(
     'MAIL_PASSWORD')  # 邮件账户的密码,这个密码是指的是授权码
 
 app.config['SQLALCHEMY_DATABASE_URI'] = prefix + os.path.join(
-    app.root_path, 'data.db')
+    app.root_path, 'db', 'data.db')
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # 关闭对模型修改的监控
 
 mail = Mail(app)
@@ -54,9 +55,9 @@ login_manager.login_view = 'login'
 from watchlist.schedulers import task_daily
 
 scheduler.add_job(func=task_daily,
-                  id='interval_task',
-                  trigger='interval',
-                  days=1,
+                  id='cron_task',
+                  trigger='cron',
+                  hour='1',
                   replace_existing=True)
 scheduler.start()
 

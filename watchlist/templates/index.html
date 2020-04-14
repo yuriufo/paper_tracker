@@ -1,38 +1,32 @@
-{% extends 'base.html' %}
+{% extends 'base.html' %} {% block content %}
+<h2>arXiv</h2>
+<form method="post" action="/arxiv">
 
-{% block content %}
-    <h2>arXiv</h2>
-    <form method="post" action="/arxiv">
+    {{ render_field(form.keyword, 0) }} {{ render_field(form.author, 0) }} {{ render_field(form.period, 0) }} {{ render_field(form.subjectCategory, 1) }} {{ render_field(form.func, 2) }}
 
-        {{ render_field(form.keyword, 0) }}
-        {{ render_field(form.author, 0) }}
-        {{ render_field(form.period, 0) }}
-        {{ render_field(form.subjectCategory, 1) }}
-        {{ render_field(form.func, 0) }}
-        
-        <center>
-            <button type="submit" class="btn">提交</button>
-        </center>
+    <center>
+        <button type="submit" class="btn">提交</button>
+    </center>
     <form />
     <script>
         var CheckAll = document.getElementById('selectAll');
         var UnCheck = document.getElementById('uncheck');
         var sc = document.getElementById('subjectCategory');
         var CheckBox = sc.getElementsByTagName('input');
-        CheckAll.onclick = function () {
+        CheckAll.onclick = function() {
             for (i = 0; i < CheckBox.length; i++) {
                 CheckBox[i].checked = true;
             };
         };
-        UnCheck.onclick = function () {
+        UnCheck.onclick = function() {
             for (i = 0; i < CheckBox.length; i++) {
                 CheckBox[i].checked = false;
             };
         };
     </script>
-{% endblock %}
 
-{% macro render_field(field, selectAll) %}
+    {% endblock %} {% macro render_field(field, selectAll) %}
+
     <dt>{{ field.label }}
     {% if selectAll == 1%}
         <input type="button" value="全选" class="button" id="selectAll">
@@ -40,6 +34,14 @@
     {% endif %}
 
     <dd>{{ field(**kwargs)|safe }}
+
+
+    {% if selectAll == 2 and current_user.is_authenticated == False %}
+        <script>
+            var input_radio = document.getElementById('func-1');
+            input_radio.disabled = true;
+        </script>
+     {% endif %}
 
     {% if field.errors %}
         <ul class=errors>

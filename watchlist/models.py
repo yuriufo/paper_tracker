@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import json
 import datetime
 
 from flask_login import UserMixin
@@ -30,7 +29,7 @@ class User(db.Model, UserMixin):  # 表名将会是 user（自动生成，小写
     #     except Exception:
     #         return False
     #     user = User.query.get(email=data.get('confirm'))
-    #     if not user:
+    #     if user is None:
     #         return False
     #     if not user.confirmed:
     #         user.confirmed = True

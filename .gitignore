@@ -5,7 +5,6 @@
 .DS_Store
 /.idea
 /.vscode
-/db
 log.log
 .env
 *.db
