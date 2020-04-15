@@ -1,40 +1,50 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 
 <head>
-    {% block head %}
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!--<meta name="viewport" content="width=device-width, initial-scale=1">-->
+    <meta name="viewport" content="width=device-width,  initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
     <title>论文追踪</title>
     <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" type="text/css"> {% endblock %}
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}" type="text/css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap-theme.min.css') }}" type="text/css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" type="text/css">
 </head>
 
-<body>
-    <div class="content">
+<body class="container-fluid">
+    <div class="row">
         {% for message in get_flashed_messages() %}
-        <div class="alert">{{ message }}</div>
+            <div class="alert">{{ message }}</div>
         {% endfor %}
-        <h1>
-            <center>论文追踪</center>
-        </h1>
-        <nav>
-            <ul>
-                <li><a href="{{ url_for('index') }}">Home</a></li>
-                {% if current_user.is_authenticated %}
-                <li><a href="{{ url_for('states') }}">States</a></li>
-                <li><a href="{{ url_for('logout') }}">Logout</a></li>
-                {% else %}
-                <li><a href="{{ url_for('login') }}">Login</a></li>
-                <li><a href="{{ url_for('register') }}">Register</a></li>
-                {% endif %}
-            </ul>
-        </nav>
-        {% block content %}{% endblock %}
     </div>
-    <footer>
+
+    <h1 class="row">
+        <center>论文追踪</center>
+    </h1>
+    <nav class="row navbar navbar-static-top navbar-inverse">
+        <ul class="nav nav-pills navbar-left">
+            <li role="presentation"><a class="navbar-text" href="{{ url_for('index') }}">Home</a></li>
+            {% if current_user.is_authenticated %}
+                <li role="presentation"><a class="navbar-text" href="{{ url_for('states') }}">States</a></li>
+                <li role="presentation"><a class="navbar-text" href="{{ url_for('logout') }}">Logout</a></li>
+            {% else %}
+                <li role="presentation"><a class="navbar-text" href="{{ url_for('login') }}">Login</a></li>
+                <li role="presentation"><a class="navbar-text" href="{{ url_for('register') }}">Register</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    {% block content %}{% endblock %}
+     <br>
+    {#
+    <footer class="row navbar-fixed-bottom">
         <small>&copy; 2020 yuriXO</small>
-    </footer>
+    </footer> #}
+    {# <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script> #}
 </body>
 
 </html>

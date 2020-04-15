@@ -13,7 +13,12 @@ class UserForm(Form):
                              validators=[
                                  InputRequired(message=u'密码不能为空!'),
                                  Length(min=8, max=20, message=u'密码长度为4-20')
-                             ])
+                             ],
+                             render_kw={
+                                 "type": 'password',
+                                 "class": "form-control",
+                                 "placeholder": "Password"
+                             })
     password_valid = PasswordField(u'再输入一次密码：',
                                    validators=[
                                        Optional(),
@@ -23,13 +28,34 @@ class UserForm(Form):
                                               message=u'密码长度为4-20'),
                                        EqualTo('password',
                                                message='Passwords must match.')
-                                   ])
+                                   ],
+                                   render_kw={
+                                       "type": 'password',
+                                       "class": "form-control",
+                                       "placeholder": "Password"
+                                   })
     email = StringField(u'Email地址(长度<50)：',
                         validators=[
                             Email(message=u'Email地址不合法!'),
                             InputRequired(message=u'Email地址不能为空!'),
                             Length(max=50, message=u'Email地址长度需小于50')
-                        ])
+                        ],
+                        render_kw={
+                            "type": 'email',
+                            "class": "form-control",
+                            "placeholder": "Email"
+                        })
+    captcha = StringField(u'Email验证码：',
+                          validators=[
+                              Optional(),
+                              InputRequired(message=u'Email验证码不能为空!'),
+                              Length(min=6, max=6, message=u'Email验证码为6位数!')
+                          ],
+                          render_kw={
+                              "type": 'text',
+                              "class": "form-control",
+                              "placeholder": "Captcha"
+                          })
 
     def __init__(self, *args, **kwargs):
         super(UserForm, self).__init__(*args, **kwargs)
@@ -68,13 +94,29 @@ class SForm(Form):
         ('cs.SC', 'Symbolic Computation'), ('cs.SY', 'Systems and Control'),
         ('cs.OH', 'Other')
     ]
-    keyword = StringField(u'关键词(多个关键词之间使用 空格 分隔,可为空)：')
-    author = StringField(u'作者(多个作者之间使用 逗号(,) 分隔,可为空)：')
-    period = IntegerField(u'监测时间间隔(0-31)：',
+    keyword = StringField(u'关键词(多个关键词之间使用 空格 分隔,可为空)：',
+                          render_kw={
+                              "type": 'text',
+                              "class": "form-control",
+                              "placeholder": "keyword"
+                          })
+    author = StringField(u'作者(多个作者之间使用 逗号(,) 分隔,可为空)：',
+                         render_kw={
+                             "type": 'text',
+                             "class": "form-control",
+                             "placeholder": "author"
+                         })
+    period = IntegerField(u'监测时间间隔(1-31)：',
+                          default=7,
                           validators=[
-                              InputRequired(message=u'取值范围为0-31天!'),
-                              NumberRange(1, 31, message=u'取值为0-31天!')
-                          ])
+                              InputRequired(message=u'取值范围为1-31天!'),
+                              NumberRange(1, 31, message=u'取值为1-31天!')
+                          ],
+                          render_kw={
+                              "type": 'number',
+                              "class": "form-control",
+                              "placeholder": "period"
+                          })
     func = RadioField(label=u"功能(监测需要先登陆)：",
                       choices=(
                           (0, "预览查询最多5篇论文"),

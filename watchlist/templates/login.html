@@ -1,25 +1,29 @@
-{% extends 'base.html' %} {% block content %}
-<center>
-    <h2>Login</h2>
-</center>
-<form method="post" style="width: 50%;margin:0px auto;">
+{% extends 'base.html' %}
+    {% block content %}
+    <center>
+        <h2>Login</h2>
+    </center>
+    <div class="container">
+        <div class="col-lg-offset-4 col-lg-4 col-md-6 col-md-offset-3 col-sm-6 col-sm-offset-3 col-xs-10 col-xs-offset-1">
+            <form method="post" role="form" style="margin:5%;">
+                {{ render_field(form.email) }}
+                {{ render_field(form.password) }}
+                <center><button type="submit" class="btn btn-default">Submit</button></center>
+            </form>
+        </div>
+    </div>
+{% endblock %}
 
-    {{ render_field(form.email) }} {{ render_field(form.password) }}
-
-    <center><button type="submit" class="btn">Submit</button></center>
-</form>
-
-{% endblock %} {% macro render_field(field) %}
-<dt>{{ field.label }}
-<dd>{{ field(**kwargs)|safe }}
-
-    {% if field.errors %}
-    <ul class=errors>
-        {% for error in field.errors %}
-        <li>{{ error }}</li>
-        {% endfor %}
-    </ul>
-    {% endif %}
-</dd>
-
-</dt> {% endmacro %}
+{% macro render_field(field) %}
+    {{ field.label }}
+    <div class="form-group">
+        {{ field(**kwargs)|safe }}
+        {% if field.errors %}
+            <ul class="has-error">
+                {% for error in field.errors %}
+                <li class="control-label">{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+{% endmacro %}

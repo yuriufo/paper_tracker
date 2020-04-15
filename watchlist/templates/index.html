@@ -1,13 +1,25 @@
-{% extends 'base.html' %} {% block content %}
-<h2>arXiv</h2>
-<form method="post" action="/arxiv">
+{% extends 'base.html' %}
 
-    {{ render_field(form.keyword, 0) }} {{ render_field(form.author, 0) }} {{ render_field(form.period, 0) }} {{ render_field(form.subjectCategory, 1) }} {{ render_field(form.func, 2) }}
-
+{% block content %}
     <center>
-        <button type="submit" class="btn">提交</button>
+        <h2>arXiv</h2>
     </center>
-    <form />
+    <div class="container">
+        {# <div class="col-lg-offset-4 col-lg-4 col-md-6 col-md-offset-3 col-sm-6 col-sm-offset-3 col-xs-10 col-xs-offset-1"> #}
+            <form method="post"  role="form" action="/arxiv">
+
+                {{ render_field(form.keyword, 0) }}
+                {{ render_field(form.author, 0) }}
+                {{ render_field(form.period, 0) }}
+                {{ render_field(form.subjectCategory, 1) }}
+                {{ render_field(form.func, 2) }}
+
+                <center>
+                    <button type="submit" class="btn btn-primary btn-lg">提交</button>
+                </center>
+            <form />
+        {# </div> #}
+    </div>
     <script>
         var CheckAll = document.getElementById('selectAll');
         var UnCheck = document.getElementById('uncheck');
@@ -23,32 +35,34 @@
                 CheckBox[i].checked = false;
             };
         };
+        
     </script>
 
-    {% endblock %} {% macro render_field(field, selectAll) %}
+{% endblock %}
 
-    <dt>{{ field.label }}
+{% macro render_field(field, selectAll) %}
+    {{ field.label }}
     {% if selectAll == 1%}
-        <input type="button" value="全选" class="button" id="selectAll">
-        <input type="button" value="全不选" class="button" id="uncheck">
+        <input type="button" value="全选" class="btn btn-default btn-xs" id="selectAll">
+        <input type="button" value="全不选" class="btn btn-default btn-xs" id="uncheck">
     {% endif %}
+    <div class="form-group">
+        
+        {{ field(**kwargs)|safe }}
 
-    <dd>{{ field(**kwargs)|safe }}
+        {% if selectAll == 2 and current_user.is_authenticated == False %}
+            <script>
+                var input_radio = document.getElementById('func-1');
+                input_radio.disabled = true;
+            </script>
+        {% endif %}
 
-
-    {% if selectAll == 2 and current_user.is_authenticated == False %}
-        <script>
-            var input_radio = document.getElementById('func-1');
-            input_radio.disabled = true;
-        </script>
-     {% endif %}
-
-    {% if field.errors %}
-        <ul class=errors>
-            {% for error in field.errors %}
-            <li>{{ error }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
-    </dd>
+        {% if field.errors %}
+            <ul class="has-error">
+                {% for error in field.errors %}
+                    <li class="control-label">{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
 {% endmacro %}

@@ -3,11 +3,17 @@
     <h2>User</h2>
     {% if users is not number %}
     <p>{{ users|length }} users</p>
-    <ul class="view-list">
+    <table class="table table-striped">
+        
         {% for user in users %}
-        <li>{{ user.email }}</li>
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>
+                    {{ user.email }}
+                </td>
+            </tr>
         {% endfor %}
-    </ul>
+    </table>
     {% else %}
     <form method="post" action="{{ url_for('logoff') }}" style="width: 90%;">
         <input type="submit" name="logoff" value="注销" onclick="return confirm('Are you sure?')">
@@ -19,7 +25,7 @@
     <h2>arXivEmail</h2>
     <p>{{ arxivemails|length }} items</p>
 </center>
-<table>
+<table class="table table-striped">
     <tr>
         <td>Email</td>
         <td>LastTracktime</td>
@@ -45,7 +51,7 @@
         </td>
         <td>
             <form class="inline-form" method="post" action="{{ url_for('delete', arxiv_id=arxivemail.id) }}">
-                <input type="submit" name="delete" value="Delete" onclick="return confirm('Are you sure?')">
+                <input class="btn btn-danger" type="submit" name="delete" value="Delete" onclick="return confirm('Are you sure?')">
             </form>
         </td>
     </tr>
