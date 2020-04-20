@@ -5,6 +5,8 @@ import os
 import sys
 import logging
 
+import memcache
+
 from flask import Flask
 
 from flask_mail import Mail
@@ -14,6 +16,8 @@ from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 
 from flask_apscheduler import APScheduler
+
+from flask_wtf.csrf import CSRFProtect
 
 logging.basicConfig(format='%(asctime)s - %(filename)s[line:%(lineno)d] - '
                     '%(levelname)s: %(message)s',
@@ -31,7 +35,6 @@ else:  # 否则使用四个斜线
     prefix = 'sqlite:////'
 
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
-
 app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER')  # 电子邮件服务器的主机名或IP地址
 app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT'))  # 电子邮件服务器的端口
 app.config["MAIL_USE_SSL"] = True
@@ -61,6 +64,9 @@ scheduler.add_job(func=task_daily,
                   replace_existing=True)
 scheduler.start()
 
+mc = memcache.Client(["127.0.0.1:11211"])
+
+CSRFProtect(app)
 
 @login_manager.user_loader
 def load_user(user_email):

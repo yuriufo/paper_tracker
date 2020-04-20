@@ -3,7 +3,7 @@ arxiv, google scholar, microsoft academic
 
 ## install
 
-环境: `Python 3.7x`
+version: `Python 3.7x`
 
 ```bash
 $ git clone https://github.com/yuriufo/paper_tracker.git

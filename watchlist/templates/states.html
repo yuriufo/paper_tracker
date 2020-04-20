@@ -3,8 +3,7 @@
     <h2>User</h2>
     {% if users is not number %}
     <p>{{ users|length }} users</p>
-    <table class="table table-striped">
-        
+    <table class="table table-striped table-responsive">
         {% for user in users %}
             <tr>
                 <td>{{ loop.index }}</td>
@@ -16,7 +15,8 @@
     </table>
     {% else %}
     <form method="post" action="{{ url_for('logoff') }}" style="width: 90%;">
-        <input type="submit" name="logoff" value="注销" onclick="return confirm('Are you sure?')">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <input class="btn btn-danger" type="submit" name="logoff" value="注销" onclick="return confirm('Are you sure?')">
     </form>
     {% endif %}
 </center>
@@ -28,9 +28,9 @@
 <table class="table table-striped">
     <tr>
         <td>Email</td>
-        <td>LastTracktime</td>
-        <td>Arg_dict</td>
-        <td>Delete</td>
+        <td>最近监测时间</td>
+        <td>配置</td>
+        <td>删除配置</td>
     </tr>
     {% for arxivemail in arxivemails %}
     <tr>
@@ -51,6 +51,7 @@
         </td>
         <td>
             <form class="inline-form" method="post" action="{{ url_for('delete', arxiv_id=arxivemail.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                 <input class="btn btn-danger" type="submit" name="delete" value="Delete" onclick="return confirm('Are you sure?')">
             </form>
         </td>

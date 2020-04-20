@@ -12,19 +12,18 @@
     
     <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}" type="text/css">
     <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap-theme.min.css') }}" type="text/css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='pretty-checkbox.min.css') }}" type="text/css">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" type="text/css">
+    <script src="{{ url_for('static', filename='jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
 </head>
 
 <body class="container-fluid">
-    <div class="row">
-        {% for message in get_flashed_messages() %}
-            <div class="alert">{{ message }}</div>
-        {% endfor %}
-    </div>
-
+    
+{# 
     <h1 class="row">
         <center>论文追踪</center>
-    </h1>
+    </h1> #}
     <nav class="row navbar navbar-static-top navbar-inverse">
         <ul class="nav nav-pills navbar-left">
             <li role="presentation"><a class="navbar-text" href="{{ url_for('index') }}">Home</a></li>
@@ -35,16 +34,32 @@
                 <li role="presentation"><a class="navbar-text" href="{{ url_for('login') }}">Login</a></li>
                 <li role="presentation"><a class="navbar-text" href="{{ url_for('register') }}">Register</a></li>
             {% endif %}
+            <li role="presentation"><a class="navbar-text" href="{{ url_for('about') }}">About</a></li>
         </ul>
     </nav>
+    <div class="row">
+        {% for message in get_flashed_messages(with_categories=True, category_filter=("success","info","warning","danger")) %}
+            {% if message[0] == "success" %}
+                <div class="alert alert-success">{{ message[1] }}</div>
+            {% elif message[0] == "info" %}
+                <div class="alert alert-info">{{ message[1] }}</div>
+            {% elif message[0] == "warning" %}
+                <div class="alert alert-warning">{{ message[1] }}</div>
+            {% elif message[0] == "danger" %}
+                <div class="alert alert-danger">{{ message[1] }}</div>
+            {% endif %}
+        {% endfor %}
+    </div>
 
     {% block content %}{% endblock %}
      <br>
-    {#
-    <footer class="row navbar-fixed-bottom">
-        <small>&copy; 2020 yuriXO</small>
+    
+    {# <footer class="container-fluid foot-wrap">
+        <div class="container" style="align:center;">
+            <small>&copy; 2020 yuriXO</small>
+        </div>
     </footer> #}
-    {# <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script> #}
+
 </body>
 
 </html>

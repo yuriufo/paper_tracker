@@ -6,6 +6,7 @@
     <div class="container">
         <div class="col-lg-offset-4 col-lg-4 col-md-6 col-md-offset-3 col-sm-6 col-sm-offset-3 col-xs-10 col-xs-offset-1">
             <form method="post" role="form" style="margin:5%;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                 {{ render_field(form.email, 0) }}
                 {{ render_field(form.captcha, 1) }}
                 {{ render_field(form.password, 0) }}
@@ -14,6 +15,93 @@
             </form>
         </div>
     </div>
+    
+    <script type="text/javascript">
+        $(function(){
+            $("#captcha-btn").click(function (){
+                sendyzm($("#captcha-btn"));
+            });
+            v = getCookieValue("secondsremained") ? getCookieValue("secondsremained") : 0; //获取cookie值
+            if(v > 0){
+                settime($("#captcha-btn"));//开始倒计时
+            }
+        })
+
+        //用ajax提交到后台的发送短信接口
+        function sendyzm(obj){
+            var Email = $("#email").val();
+            if(isEmail(Email)) {
+                $.getJSON("{{ url_for('email_captcha') }}", {
+                    email: Email
+                }, function(data) {
+                    alert(data.msg);
+                });
+                addCookie("secondsremained", 60, 60); //添加cookie记录，有效时间为60s
+                settime(obj); //开始倒计时
+            }else{
+                alert("Email格式不正确!");
+            }
+        }
+
+        //60s倒计时实现逻辑
+        var countdown;
+        function settime(obj) {
+            countdown = getCookieValue("secondsremained");
+            if (countdown == undefined) {
+                obj.removeAttr("disabled");
+                obj.css("pointer-events", "auto");
+                obj.text("点击获取验证码");
+                return;
+            } else {
+                obj.attr("disabled", true);
+                obj.css("pointer-events", "none");
+                obj.text("("+countdown+"s)后重新发送") ;
+                countdown--;
+                editCookie("secondsremained", countdown, countdown+1);
+            }
+            setTimeout(function() { settime(obj) },1000); //每1000毫秒执行一次
+        }
+
+        function isEmail(strEmail) {
+            if (strEmail.search(/^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z0-9]+$/) != -1)
+                return true;
+            else
+                return false;
+        }
+
+        //发送验证码是添加cookie
+        function addCookie(name, value, expiresHours){
+            var cookieString = name + "=" + escape(value);
+            //判断是否设置过期时间，0代表关闭浏览器时失效
+            if(expiresHours > 0){
+                var date = new Date();
+                date.setTime(date.getTime() + expiresHours * 1000);
+                cookieString = cookieString + ";expires=" + date.toUTCString();
+            }
+            document.cookie = cookieString;
+        }
+        //修改cookie的值
+        function editCookie(name, value, expiresHours){
+            var cookieString = name + "=" + escape(value);
+            if(expiresHours > 0){
+                var date = new Date();
+                date.setTime(date.getTime() + expiresHours * 1000);
+                cookieString = cookieString + ";expires=" + date.toUTCString();
+            }
+            document.cookie = cookieString;
+        }
+        //根据名字获取cookie的值
+        function getCookieValue(name){
+            var strCookie = document.cookie;
+            var arrCookie = strCookie.split("; ");
+            for(var i=0; i < arrCookie.length; i++){
+                var arr = arrCookie[i].split("=");
+                if(arr[0] == name){
+                    return unescape(arr[1]);
+                }
+            }
+        }
+    </script> 
 {% endblock %}
 
 {% macro render_field(field, id) %}
@@ -28,7 +116,7 @@
     {{ field(**kwargs)|safe }}
     
     {% if id == 1 %}
-        <span class="input-group-addon" type="button" id="captcha-btn">获取验证码</span>
+        <span class="btn input-group-addon" type="button" id="captcha-btn">点击获取验证码</span>
     {% endif %}
     
     {% if field.errors %}

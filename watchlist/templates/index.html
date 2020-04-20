@@ -8,6 +8,8 @@
         {# <div class="col-lg-offset-4 col-lg-4 col-md-6 col-md-offset-3 col-sm-6 col-sm-offset-3 col-xs-10 col-xs-offset-1"> #}
             <form method="post"  role="form" action="/arxiv">
 
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
                 {{ render_field(form.keyword, 0) }}
                 {{ render_field(form.author, 0) }}
                 {{ render_field(form.period, 0) }}
@@ -37,7 +39,6 @@
         };
         
     </script>
-
 {% endblock %}
 
 {% macro render_field(field, selectAll) %}
@@ -45,24 +46,53 @@
     {% if selectAll == 1%}
         <input type="button" value="全选" class="btn btn-default btn-xs" id="selectAll">
         <input type="button" value="全不选" class="btn btn-default btn-xs" id="uncheck">
-    {% endif %}
-    <div class="form-group">
-        
-        {{ field(**kwargs)|safe }}
-
-        {% if selectAll == 2 and current_user.is_authenticated == False %}
+        <div class="form-group row">
+            {{ field(**kwargs)|safe }}
             <script>
-                var input_radio = document.getElementById('func-1');
-                input_radio.disabled = true;
+                var checkbox_ul = document.getElementById('subjectCategory');
+                var checkbox_li = checkbox_ul.getElementsByTagName("li");
+                for (i = 0; i < checkbox_li.length; i++) {
+                    var x = checkbox_li[i];
+                    x.classList = "pretty p-default p-curve";
+                    var y = x.getElementsByTagName("label")[0];
+                    var para = document.createElement("div");
+                    para.classList = "state p-success";
+                    para.appendChild(y.cloneNode(true));
+                    x.replaceChild(para, y);
+                };
             </script>
-        {% endif %}
+    {% else %}
+        <div class="form-group">
+            {{ field(**kwargs)|safe }}
+    {% endif %}
 
-        {% if field.errors %}
-            <ul class="has-error">
-                {% for error in field.errors %}
-                    <li class="control-label">{{ error }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    </div>
+            {% if selectAll == 2%}
+                <script>
+                    var radio_ul = document.getElementById('func');
+                    var radio_li = radio_ul.getElementsByTagName("li");
+                    for (i = 0; i < radio_li.length; i++) {
+                        var x = radio_li[i];
+                        x.classList = "pretty p-default p-round";
+                        var y = x.getElementsByTagName("label")[0];
+                        var para = document.createElement("div");
+                        para.classList = "state p-success-o";
+                        para.appendChild(y.cloneNode(true));
+                        x.replaceChild(para, y);
+                    };
+                    {% if current_user.is_authenticated == False %}
+                        var input_radio = document.getElementById('func-1');
+                        input_radio.disabled = true;
+                    {% endif %}
+                </script>
+            {% endif %}
+
+            {% if field.errors %}
+                <ul class="has-error">
+                    {% for error in field.errors %}
+                        <li class="control-label">{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+    
 {% endmacro %}

@@ -72,7 +72,6 @@ def task_daily():
         except Exception:
             logger.exception('search or send email faild.')
             continue
-
-        arXivEmail.query.filter(arXivEmail.id == arxivemail.id).update(
+        db.session.query(arXivEmail).filter(arXivEmail.id == arxivemail.id).update(
             {"lastTracktime": timeNow})
         db.session.commit()
