@@ -66,10 +66,9 @@ class arXiv(object):
         # 构造作者请求参数
         if isinstance(author, (tuple, list)):
             search_query.append(r"%28{0}%29".format("+OR+".join(
-                ["au:" + au.replace(' ', '+') for au in author])))
+                ["au:%22" + au + "%22" for au in author])))
         elif isinstance(author, str) and len(author) > 0:
-            search_query.append(r"%28{0}%29".format("au:" +
-                                                    author.replace(' ', '+')))
+            search_query.append(r"%28{0}%29".format("au:%22" + author + "%22"))
 
         # 构造类别请求参数
         if len(Subject_Category) > 0:
@@ -78,20 +77,20 @@ class arXiv(object):
 
         # 构造关键词请求参数
         if isinstance(keyword, (tuple, list)):
-            search_query.append(
-                r"%28{0}%29".format("ti:%22" + "+".join([kw
-                                                         for kw in keyword]) +
-                                    "%22+OR+abs:%22" +
-                                    "+".join([kw for kw in keyword]) + "%22"))
+            search_query.append(r"%28{0}%29".format(
+                "+OR+".join(["ti:%22" + kw + "%22"
+                             for kw in keyword]) + "+OR+" +
+                "+OR+".join(["abs:%22" + kw + "%22" for kw in keyword])))
         elif isinstance(keyword, str) and len(keyword) > 0:
-            search_query.append(r"%28{0}%29".format("ti:" + keyword +
-                                                    "+OR+abs:" + keyword))
+            search_query.append(
+                r"%28{0}%29".format("ti:%22" + keyword + "%22+OR+abs:%22" +
+                                    keyword + "%22"))
 
         # 构造搜索请求参数
         search_query = "+AND+".join(search_query)
         logger.info('Searching arXiv for {0}'.format(search_query))
 
-        return search_query
+        return search_query.replace(' ', '+')
 
     def search(self,
                Subject_Category,

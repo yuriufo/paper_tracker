@@ -94,7 +94,7 @@ class SForm(Form):
                ('cs.SE', 'Software Engineering'), ('cs.SD', 'Sound'),
                ('cs.SC', 'Symbolic Computation'),
                ('cs.SY', 'Systems and Control'), ('cs.OH', 'Other')]
-    keyword = StringField(u'关键词(多个关键词之间使用 空格 分隔,可为空)：',
+    keyword = StringField(u'关键词(多个关键词之间使用 半角逗号(,) 分隔,可为空)：',
                           render_kw={
                               "type": 'text',
                               "class": "form-control",
@@ -128,7 +128,10 @@ class SForm(Form):
         u'主题(默认已选择部分与安全相关的主题)：',
         choices=sc_list,
         # choices=sorted(sc_list, key=lambda x: len(x[1])),
-        default=["cs.AI", "cs.CR", "cs.SE", "cs.CY", "cs.SE", "cs.CE", "cs.ML"],
+        default=[
+            "cs.AI", "cs.CR", "cs.SE", "cs.CY", "cs.SE", "cs.CE", "cs.ML",
+            "cs.CL", "cs.LG", "cs.DS"
+        ],
         validators=[InputRequired(message=u'请至少选择一个主题!')],
         option_widget=widgets.CheckboxInput(),
         widget=widgets.ListWidget(prefix_label=False))
@@ -147,9 +150,11 @@ class SForm(Form):
         fc = int(self.func.data)
         sp = int(self.period.data)  # 时期
         if ' ' in kw:
-            kw = re.split(r" +", kw)
+            kw = re.split(r",+", kw)
+            kw = list(map(str.strip, kw))
         if ',' in au:
             au = re.split(r",+", au)
+            au = list(map(str.strip, au))
         arg_dict = {
             'keyword': kw,
             'author': au,
